@@ -1,0 +1,23 @@
+{
+  "overview": "Industrial factory monitoring dashboard for real-time conveyor-based object detection and counting. Features a simulated live camera feed with bounding boxes, large metric displays, control buttons, and a historical analytics chart. Built for factory-floor visibility with a dark, minimal industrial design.",
+  "features": [
+    "Live camera feed simulation with bounding boxes and object IDs",
+    "ROI (Region of Interest) line with detection highlight",
+    "Large Total Count and real-time metrics panel",
+    "Start/Pause/Reset controls",
+    "Line graph for historical performance analytics",
+    "Dark industrial theme with green/red accents"
+  ],
+  "category": "productivity",
+  "tags": [
+    "dashboard",
+    "industrial",
+    "monitoring",
+    "real-time",
+    "analytics",
+    "factory",
+    "conveyor",
+    "detection"
+  ],
+  "last_updated": "2026-04-24T05:35:55.649Z"
+}
