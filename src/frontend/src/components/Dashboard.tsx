@@ -121,7 +121,32 @@ export default function Dashboard() {
     "Vessel 4": 96,
   });
   const [cameraOnline, setCameraOnline] = useState(true);
+  const [fps, setFps] = useState(0);
+  const [avgConfidence, setAvgConfidence] = useState(0.92);
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const fpsRef = useRef<{ lastTime: number; frameCount: number }>({
+    lastTime: performance.now(),
+    frameCount: 0,
+  });
+  const rafRef = useRef<number | null>(null);
+
+  // FPS tracking via rAF
+  useEffect(() => {
+    const loop = (now: number) => {
+      fpsRef.current.frameCount++;
+      const elapsed = now - fpsRef.current.lastTime;
+      if (elapsed >= 1000) {
+        setFps(Math.round((fpsRef.current.frameCount * 1000) / elapsed));
+        fpsRef.current.frameCount = 0;
+        fpsRef.current.lastTime = now;
+      }
+      rafRef.current = requestAnimationFrame(loop);
+    };
+    rafRef.current = requestAnimationFrame(loop);
+    return () => {
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
 
   const tick = useCallback(() => {
     setRate(() => Number.parseFloat((14 + Math.random() * 8).toFixed(1)));
@@ -168,6 +193,15 @@ export default function Dashboard() {
       }
 
       return final;
+    });
+
+    // Update avg confidence from current objects
+    setObjects((prev) => {
+      if (prev.length > 0) {
+        const sum = prev.reduce((s, o) => s + o.confidence, 0);
+        setAvgConfidence(sum / prev.length);
+      }
+      return prev;
     });
 
     if (roiCrossings > 0) {
@@ -282,6 +316,8 @@ export default function Dashboard() {
             onResetBatch={handleReset}
             vesselCounts={vesselCounts}
             cameraOnline={cameraOnline}
+            fps={fps}
+            avgConfidence={avgConfidence}
           />
         </div>
       </div>

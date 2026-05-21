@@ -40713,7 +40713,9 @@ function MetricsPanel({
   batchCount,
   onResetBatch,
   vesselCounts,
-  cameraOnline
+  cameraOnline,
+  fps,
+  avgConfidence
 }) {
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(
     "div",
@@ -40746,6 +40748,15 @@ function MetricsPanel({
               accent: true
             }
           ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            MetricRow,
+            {
+              label: "Detection Confidence",
+              value: (avgConfidence * 100).toFixed(1),
+              unit: "%"
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(MetricRow, { label: "FPS", value: fps, unit: "fps" }),
           /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col gap-0.5 py-3 border-b border-border/25", children: [
             /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between", children: [
               /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-body text-xs tracking-widest uppercase text-muted-foreground leading-none", children: "Batch Count" }),
@@ -40963,7 +40974,30 @@ function Dashboard() {
     "Vessel 4": 96
   });
   const [cameraOnline, setCameraOnline] = reactExports.useState(true);
+  const [fps, setFps] = reactExports.useState(0);
+  const [avgConfidence, setAvgConfidence] = reactExports.useState(0.92);
   const tickRef = reactExports.useRef(null);
+  const fpsRef = reactExports.useRef({
+    lastTime: performance.now(),
+    frameCount: 0
+  });
+  const rafRef = reactExports.useRef(null);
+  reactExports.useEffect(() => {
+    const loop = (now2) => {
+      fpsRef.current.frameCount++;
+      const elapsed = now2 - fpsRef.current.lastTime;
+      if (elapsed >= 1e3) {
+        setFps(Math.round(fpsRef.current.frameCount * 1e3 / elapsed));
+        fpsRef.current.frameCount = 0;
+        fpsRef.current.lastTime = now2;
+      }
+      rafRef.current = requestAnimationFrame(loop);
+    };
+    rafRef.current = requestAnimationFrame(loop);
+    return () => {
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
   const tick = reactExports.useCallback(() => {
     setRate(() => Number.parseFloat((14 + Math.random() * 8).toFixed(1)));
     let roiCrossings = 0;
@@ -40994,6 +41028,13 @@ function Dashboard() {
         final = [...makeRow(rowIdCounter, SPAWN_Y), ...visible];
       }
       return final;
+    });
+    setObjects((prev) => {
+      if (prev.length > 0) {
+        const sum = prev.reduce((s2, o) => s2 + o.confidence, 0);
+        setAvgConfidence(sum / prev.length);
+      }
+      return prev;
     });
     if (roiCrossings > 0) {
       setRoiActive(true);
@@ -41110,7 +41151,9 @@ function Dashboard() {
               batchCount,
               onResetBatch: handleReset,
               vesselCounts,
-              cameraOnline
+              cameraOnline,
+              fps,
+              avgConfidence
             }
           ) })
         ] })

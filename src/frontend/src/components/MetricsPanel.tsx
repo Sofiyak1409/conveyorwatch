@@ -9,6 +9,8 @@ interface MetricsPanelProps {
   onResetBatch: () => void;
   vesselCounts: VesselCounts;
   cameraOnline: boolean;
+  fps: number;
+  avgConfidence: number;
 }
 
 function MetricRow({
@@ -61,6 +63,8 @@ export default function MetricsPanel({
   onResetBatch,
   vesselCounts,
   cameraOnline,
+  fps,
+  avgConfidence,
 }: MetricsPanelProps) {
   return (
     <div
@@ -100,6 +104,16 @@ export default function MetricsPanel({
           size="large"
           accent
         />
+
+        {/* Detection Confidence */}
+        <MetricRow
+          label="Detection Confidence"
+          value={(avgConfidence * 100).toFixed(1)}
+          unit="%"
+        />
+
+        {/* FPS */}
+        <MetricRow label="FPS" value={fps} unit="fps" />
 
         {/* Batch Count with reset */}
         <div className="flex flex-col gap-0.5 py-3 border-b border-border/25">
